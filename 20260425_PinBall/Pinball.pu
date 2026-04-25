@@ -1,0 +1,56 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor #FEFECE
+  BorderColor #A80036
+  ArrowColor #A80036
+}
+
+header Unity 3D Pinball System Flow
+title ピンボールゲームのメインロジック
+
+start
+
+:**ゲーム開始 (Scene Load)**;
+:ボールを初期位置に生成;
+
+partition "メインループ (Update/FixedUpdate)" {
+    repeat
+        :ユーザー入力を待機;
+        
+        if (入力あり?) then (Yes)
+            if (フリッパー操作?) then (左右キー)
+                :AddTorque / Rotation でフリッパーを動かす;
+            else (発射操作?)
+                :プランジャーのバネ力をボールに加える;
+            endif
+        endif
+
+        :物理演算 (Physics Engine);
+        note right: 重力、衝突判定、反発係数
+        
+        if (衝突発生?) then (Yes)
+            :衝突音再生 / エフェクト発生;
+            if (バンパーに接触?) then (Yes)
+                :スコア加算;
+                :ボールに反発力を加える;
+            endif
+        endif
+
+        backward: プレイ継続;
+    repeat while (ボールが場内にある?) is (Yes)
+}
+
+:**アウトホール (ボール落下)**;
+
+if (残りボールあり?) then (Yes)
+    :ボール数を1減らす;
+    :ボールを再生成;
+    detach
+else (No)
+    :ゲームオーバー表示;
+    :ハイスコア判定・保存;
+endif
+
+stop
+@enduml
